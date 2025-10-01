@@ -1,109 +1,64 @@
-package com.srec.complaint;
+    package com.srec.complaint;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+    import java.io.IOException;
+    import java.io.PrintWriter;
+    import java.sql.Connection;
+    import java.sql.SQLException;
 
-import com.google.gson.Gson;
+    import jakarta.servlet.ServletException;
+    import jakarta.servlet.annotation.WebServlet;
+    import jakarta.servlet.http.HttpServlet;
+    import jakarta.servlet.http.HttpServletRequest;
+    import jakarta.servlet.http.HttpServletResponse;
 
-import jakarta.servlet.ServletException;
-// import jakarta.servlet.annotation.MultipartConfig; // Annotation is now removed
-// import jakarta.servlet.annotation.WebServlet; // Annotation is now removed
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
+    @WebServlet("/complaint")
+    public class ComplaintServlet extends HttpServlet {
+        private static final long serialVersionUID = 1L;
 
-// Annotations are removed. Configuration is now in web.xml
-public class ComplaintServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    private final Gson gson = new Gson();
+        @Override
+        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        Map<String, Object> jsonResponse = new HashMap<>();
+            out.println("<html><head><title>Database Connection Test</title>");
+            out.println("<style>body { font-family: monospace; padding: 20px; } h1 { color: #2C3E50; } .success { color: #27AE60; } .failure { color: #C0392B; } pre { background-color: #f4f4f4; border: 1px solid #ddd; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }</style>");
+            out.println("</head><body>");
+            out.println("<h1>Running Aiven Database Connection Test from Render Server...</h1>");
 
-        try {
-            Complaint complaint = new Complaint();
-            complaint.setCategory(request.getParameter("category"));
-            complaint.setLocation(request.getParameter("location"));
-            complaint.setLandmark(request.getParameter("landmark"));
-            complaint.setDescription(request.getParameter("description"));
-            complaint.setName(request.getParameter("name"));
-            complaint.setPhone(request.getParameter("phone"));
-            complaint.setStatus("Submitted");
-
-            Part filePart = request.getPart("image");
-            if (filePart != null && filePart.getSize() > 0) {
-                String fileName = filePart.getSubmittedFileName();
-                String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
+            Connection conn = null;
+            try {
+                // Attempt to get a connection from our DatabaseManager
+                conn = DatabaseManager.getConnection();
                 
-                String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdir();
+                // If we reach here without an error, the connection was successful.
+                out.println("<h2 class='success'>SUCCESS: Database Connection Verified!</h2>");
+                out.println("<p>This proves that your Render server can successfully connect to your Aiven database.</p>");
+                out.println("<p>Your credentials (Host, Port, User, Password, DB Name) and firewall settings are all correct.</p>");
+
+            } catch (Exception e) {
+                // If any error occurs during connection, we catch it here.
+                out.println("<h2 class='failure'>FAILURE: Could not connect to the database.</h2>");
+                out.println("<p>This is the definitive error from the server. The problem is one of the following:</p>");
+                out.println("<ul>");
+                out.println("<li>A typo in your Render Environment Variables (DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME).</li>");
+                out.println("<li>An Aiven firewall rule is still blocking the connection.</li>");
+                out.println("</ul>");
+                out.println("<h3>Full Error Details:</h3>");
+                out.println("<pre>");
+                e.printStackTrace(out); // Print the full, detailed error stack trace to the webpage
+                out.println("</pre>");
+            } finally {
+                // Always make sure to close the connection if it was opened.
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException ex) {
+                        // Ignore close errors
+                    }
                 }
-
-                filePart.write(uploadPath + File.separator + uniqueFileName);
-                complaint.setImagePath("uploads/" + uniqueFileName);
-            } else {
-                complaint.setImagePath(null);
             }
-
-            String newId = DatabaseManager.addComplaint(complaint);
-
-            if (newId != null) {
-                jsonResponse.put("success", true);
-                jsonResponse.put("complaintId", newId);
-            } else {
-                jsonResponse.put("success", false);
-                jsonResponse.put("message", "Failed to register complaint in the database.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            jsonResponse.put("success", false);
-            jsonResponse.put("message", "Database error: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            e.printStackTrace();
-            jsonResponse.put("success", false);
-            jsonResponse.put("message", "An unexpected server error occurred: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.println("</body></html>");
         }
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
     }
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        Map<String, Object> jsonResponse = new HashMap<>();
-
-        try {
-            String complaintId = request.getParameter("complaintId");
-            Complaint complaint = DatabaseManager.getComplaintById(complaintId);
-
-            if (complaint != null) {
-                jsonResponse.put("success", true);
-                jsonResponse.put("complaint", complaint);
-            } else {
-                jsonResponse.put("success", false);
-                jsonResponse.put("message", "Complaint with ID " + complaintId + " not found.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            jsonResponse.put("success", false);
-            jsonResponse.put("message", "Database error: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
-    }
-}
+    
 
