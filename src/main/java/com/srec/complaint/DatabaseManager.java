@@ -15,15 +15,16 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DatabaseManager {
 
     // --- CONFIGURE YOUR DATABASE CONNECTION HERE ---
-    // These values will be read from the Environment Variables on the Render server
+    // These values are read securely from the Environment Variables on the Render server.
     private static final String DB_HOST = System.getenv("DB_HOST");
+    private static final String DB_PORT = System.getenv("DB_PORT");
     private static final String DB_NAME = System.getenv("DB_NAME");
     private static final String DB_USER = System.getenv("DB_USER");
     private static final String DB_PASSWORD = System.getenv("DB_PASSWORD");
 
-    // Construct the database URL from the environment variables
-    // This URL forces SSL which is required by Aiven and other secure cloud DBs
-    private static final String DB_URL = "jdbc:mysql://" + DB_HOST + "/" + DB_NAME + "?verifyServerCertificate=true&useSSL=true&requireSSL=true";
+    // Construct the database URL from the environment variables, including SSL settings for Aiven.
+    private static final String DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?verifyServerCertificate=true&useSSL=true&requireSSL=true";
+
 
     // Load the JDBC driver
     static {
