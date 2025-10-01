@@ -3,9 +3,31 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
    version="6.0">
-    
-    <!-- Servlets are now defined using @WebServlet annotations in their Java files. -->
-    <!-- This file is kept for the web-app structure but servlet mappings are now in the code. -->
-    
+  
+  <!-- Admin Servlet Definition and Mapping -->
+  <servlet>
+    <servlet-name>AdminServlet</servlet-name>
+    <servlet-class>com.srec.complaint.AdminServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AdminServlet</servlet-name>
+    <url-pattern>/admin</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Complaint Servlet Definition and Mapping with File Upload Config -->
+  <servlet>
+    <servlet-name>ComplaintServlet</servlet-name>
+    <servlet-class>com.srec.complaint.ComplaintServlet</servlet-class>
+    <multipart-config>
+      <file-size-threshold>1048576</file-size-threshold> <!-- 1 MB -->
+      <max-file-size>10485760</max-file-size>   <!-- 10 MB -->
+      <max-request-size>15728640</max-request-size> <!-- 15 MB -->
+    </multipart-config>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ComplaintServlet</servlet-name>
+    <url-pattern>/complaint</url-pattern>
+  </servlet-mapping>
+  
 </web-app>
 

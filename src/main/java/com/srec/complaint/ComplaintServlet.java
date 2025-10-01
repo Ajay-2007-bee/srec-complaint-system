@@ -10,19 +10,14 @@ import java.util.UUID;
 import com.google.gson.Gson;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
-import jakarta.servlet.annotation.WebServlet;
+// import jakarta.servlet.annotation.MultipartConfig; // Annotation is now removed
+// import jakarta.servlet.annotation.WebServlet; // Annotation is now removed
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
-@WebServlet("/complaint") // Annotation to map this servlet to the /complaint URL
-@MultipartConfig(
-    fileSizeThreshold = 1024 * 1024,      // 1 MB
-    maxFileSize = 1024 * 1024 * 10,     // 10 MB
-    maxRequestSize = 1024 * 1024 * 15   // 15 MB
-)
+// Annotations are removed. Configuration is now in web.xml
 public class ComplaintServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private final Gson gson = new Gson();
