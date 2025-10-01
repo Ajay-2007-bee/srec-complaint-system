@@ -3,307 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - SREC Complaint System</title>
+    <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-        }
-        #login-section {
-            min-height: 100vh;
-            background-image: linear-gradient(to right top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
-        }
-        #dashboard-section {
-            display: none; /* Initially hidden */
-        }
-        .complaint-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-        }
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 2rem;
-            border: 1px solid #888;
-            width: 90%;
-            max-width: 700px;
-            border-radius: 0.5rem;
-            position: relative;
-        }
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 25px;
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
 
-    <!-- Login Section -->
-    <div id="login-section" class="flex items-center justify-center">
-        <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
+    <!-- Login View -->
+    <div id="loginView" class="min-h-screen flex items-center justify-center gradient-bg">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Admin Login</h2>
             <p class="text-center text-gray-500 mb-8">SREC Municipal Corporation</p>
-            <form id="loginForm">
-                <div id="login-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Error!</strong>
-                    <span class="block sm:inline" id="login-error-message"></span>
+            <div id="loginError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 hidden" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" id="loginErrorMessage"></span>
+            </div>
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
-                <div class="mb-5">
-                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username</label>
-                    <input type="text" id="username" name="username" class="shadow-inner appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
-                <div class="mb-6">
-                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="password" name="password" class="shadow-inner appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="flex items-center justify-center">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
-                        Sign In
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">Sign In</button>
             </form>
         </div>
     </div>
 
-    <!-- Dashboard Section -->
-    <div id="dashboard-section">
+    <!-- Admin Dashboard View -->
+    <div id="dashboardView" class="hidden">
         <header class="bg-white shadow-md">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-                <button id="logout-btn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Logout</button>
+                <button id="logoutButton" class="bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 transition duration-300">Logout</button>
             </div>
         </header>
 
-        <main class="container mx-auto px-6 py-8">
-            <h2 class="text-3xl font-semibold text-gray-700 mb-6">Live Complaint Queue</h2>
-            <div id="complaints-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Complaint cards will be injected here -->
+        <main class="container mx-auto px-6 py-8 grid lg:grid-cols-3 gap-8">
+            <!-- Complaints List -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Live Complaints</h2>
+                <div id="complaintsList" class="space-y-3 max-h-[70vh] overflow-y-auto">
+                    <!-- Complaints will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Complaint Details -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                 <h2 class="text-xl font-bold text-gray-800 mb-4">Complaint Details</h2>
+                 <div id="complaintDetails" class="text-gray-700">
+                    <p>Select a complaint from the list to view details.</p>
+                 </div>
             </div>
         </main>
     </div>
-    
-    <!-- Complaint Details Modal -->
-    <div id="complaintModal" class="modal">
-        <div class="modal-content">
-            <span id="modalClose" class="modal-close">&times;</span>
-            <div id="modal-body"></div>
-        </div>
-    </div>
-
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginSection = document.getElementById('login-section');
-            const dashboardSection = document.getElementById('dashboard-section');
-            const loginForm = document.getElementById('loginForm');
-            const logoutBtn = document.getElementById('logout-btn');
-            const complaintsContainer = document.getElementById('complaints-container');
-            
-            const modal = document.getElementById('complaintModal');
-            const modalBody = document.getElementById('modal-body');
-            const modalClose = document.getElementById('modalClose');
+        // DOM Elements
+        const loginView = document.getElementById('loginView');
+        const dashboardView = document.getElementById('dashboardView');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const loginErrorMessage = document.getElementById('loginErrorMessage');
+        const complaintsList = document.getElementById('complaintsList');
+        const complaintDetails = document.getElementById('complaintDetails');
+        const logoutButton = document.getElementById('logoutButton');
 
-            // Check session storage if user is already logged in
-            if(sessionStorage.getItem('isAdminAuthenticated') === 'true') {
-                showDashboard();
-            }
+        // Check for session token on page load
+        if (sessionStorage.getItem('isAdminAuthenticated')) {
+            showDashboard();
+        }
 
-            function showDashboard() {
-                loginSection.style.display = 'none';
-                dashboardSection.style.display = 'block';
-                fetchComplaints();
-            }
+        // Login Handler
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-            function showLogin() {
-                sessionStorage.removeItem('isAdminAuthenticated');
-                loginSection.style.display = 'flex';
-                dashboardSection.style.display = 'none';
-            }
-
-            // Login form submission
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const formData = new URLSearchParams(new FormData(loginForm));
-                formData.append('action', 'login');
-                const loginErrorDiv = document.getElementById('login-error');
-                const loginErrorMessage = document.getElementById('login-error-message');
-
-                fetch('admin', {
+            try {
+                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                const response = await fetch('admin', {
                     method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        sessionStorage.setItem('isAdminAuthenticated', 'true');
-                        showDashboard();
-                    } else {
-                        loginErrorMessage.textContent = data.message || 'Invalid username or password.';
-                        loginErrorDiv.classList.remove('hidden');
-                    }
-                })
-                .catch(error => {
-                    console.error('Login Error:', error);
-                    loginErrorMessage.textContent = 'Server error. Please try again later.';
-                    loginErrorDiv.classList.remove('hidden');
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
                 });
-            });
-            
-            // Logout
-            logoutBtn.addEventListener('click', () => {
-                 fetch('admin?action=logout', { method: 'POST' })
-                    .then(() => showLogin())
-                    .catch(() => showLogin()); // Also logout on frontend if server fails
-            });
 
+                // Check for non-200 responses first
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const result = await response.json();
 
-            function fetchComplaints() {
-                complaintsContainer.innerHTML = '<p class="text-gray-500">Loading complaints...</p>';
-                fetch('admin?action=getComplaints')
-                    .then(response => {
-                        if (response.status === 401) { // Unauthorized
-                           showLogin();
-                           return;
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data && data.success) {
-                            renderComplaints(data.complaints);
-                        } else {
-                            complaintsContainer.innerHTML = `<p class="text-red-500">${data.message || 'Failed to load complaints.'}</p>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch Complaints Error:', error);
-                        complaintsContainer.innerHTML = '<p class="text-red-500">Error connecting to server.</p>';
-                    });
+                if (result.success) {
+                    sessionStorage.setItem('isAdminAuthenticated', 'true');
+                    showDashboard();
+                } else {
+                    showLoginError(result.message || 'Invalid credentials.');
+                }
+            } catch (error) {
+                console.error('Login Error:', error);
+                // This is the error you are seeing. It triggers when the fetch itself fails (e.g., 404 Not Found)
+                showLoginError('Server error. Please try again later.');
             }
+        });
+        
+        // Logout Handler
+        logoutButton.addEventListener('click', () => {
+            sessionStorage.removeItem('isAdminAuthenticated');
+            loginError.classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            dashboardView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
 
-            function renderComplaints(complaints) {
-                complaintsContainer.innerHTML = '';
-                if(complaints.length === 0) {
-                    complaintsContainer.innerHTML = '<p class="text-gray-500">No active complaints.</p>';
+        // Function to show the dashboard
+        function showDashboard() {
+            loginView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            fetchComplaints();
+        }
+        
+        // Function to show login error
+        function showLoginError(message) {
+            loginErrorMessage.textContent = message;
+            loginError.classList.remove('hidden');
+        }
+
+        // Fetch all complaints
+        async function fetchComplaints() {
+            try {
+                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                const response = await fetch('admin?action=getAll');
+                const complaints = await response.json();
+                
+                complaintsList.innerHTML = ''; // Clear list
+                if (complaints.length === 0) {
+                    complaintsList.innerHTML = '<p class="text-gray-500">No complaints found.</p>';
                     return;
                 }
-                complaints.sort((a,b) => new Date(b.submissionDate) - new Date(a.submissionDate)); // Show newest first
-                
-                complaints.forEach(c => {
-                    const statusColor = c.status === 'Resolved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-                    const card = document.createElement('div');
-                    card.className = 'complaint-card bg-white p-6 rounded-lg shadow-md transition-transform duration-300 cursor-pointer';
-                    card.dataset.complaintId = c.id;
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <h3 class="text-lg font-bold text-gray-800">${c.category}</h3>
-                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${statusColor}">${c.status}</span>
+
+                complaints.forEach(complaint => {
+                    const div = document.createElement('div');
+                    let statusColor = 'bg-yellow-200 text-yellow-800';
+                    if (complaint.status.toLowerCase() === 'resolved') {
+                        statusColor = 'bg-green-200 text-green-800';
+                    } else if (complaint.status.toLowerCase() === 'in progress') {
+                        statusColor = 'bg-blue-200 text-blue-800';
+                    }
+                    div.className = 'p-3 border rounded-lg cursor-pointer hover:bg-gray-100';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold">${complaint.category}</span>
+                            <span class="text-xs px-2 py-1 rounded-full ${statusColor}">${complaint.status}</span>
                         </div>
-                        <p class="text-gray-600 mt-2">${c.location}</p>
-                        <p class="text-sm text-gray-500 mt-1">ID: ${c.id}</p>
-                        <p class="text-xs text-gray-400 mt-4">${new Date(c.submissionDate).toLocaleString()}</p>
+                        <p class="text-sm text-gray-600">${complaint.location}</p>
+                        <p class="text-xs text-gray-400">ID: ${complaint.id}</p>
                     `;
-                    card.addEventListener('click', () => viewComplaintDetails(c.id));
-                    complaintsContainer.appendChild(card);
+                    div.onclick = () => fetchComplaintDetails(complaint.id);
+                    complaintsList.appendChild(div);
                 });
+            } catch (error) {
+                console.error('Fetch Complaints Error:', error);
+                complaintsList.innerHTML = '<p class="text-red-500">Could not load complaints.</p>';
             }
-            
-            function viewComplaintDetails(id) {
-                 fetch(`admin?action=getComplaintDetails&complaintId=${id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.success) {
-                            renderModal(data.complaint);
-                        } else {
-                            alert(data.message || 'Could not fetch details.');
-                        }
-                    });
-            }
-            
-            function renderModal(c) {
-                const imageUrl = c.imagePath ? `<a href="${c.imagePath}" target="_blank" class="text-blue-500 hover:underline">View Uploaded Image</a>` : 'No image uploaded';
-                modalBody.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-4">Complaint Details</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                        <p><strong>ID:</strong> ${c.id}</p>
-                        <p><strong>Status:</strong> <span class="font-bold">${c.status}</span></p>
-                        <p><strong>Category:</strong> ${c.category}</p>
-                        <p><strong>Date:</strong> ${new Date(c.submissionDate).toLocaleString()}</p>
-                        <p class="md:col-span-2"><strong>Location:</strong> ${c.location}</p>
-                        <p class="md:col-span-2"><strong>Landmark:</strong> ${c.landmark}</p>
-                        <p class="md:col-span-2"><strong>Description:</strong> ${c.description}</p>
-                        <hr class="md:col-span-2">
-                        <p><strong>Name:</strong> ${c.name}</p>
-                        <p><strong>Phone:</strong> ${c.phone}</p>
-                        <p class="md:col-span-2"><strong>Image:</strong> ${imageUrl}</p>
-                    </div>
-                    <div class="mt-6 flex justify-end space-x-4">
-                        <select id="status-selector" class="border rounded py-2 px-3">
-                            <option value="Submitted" ${c.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-                            <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                            <option value="Resolved" ${c.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                        </select>
-                        <button id="update-status-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">Update Status</button>
+        }
+        
+        // Fetch details of a single complaint
+        async function fetchComplaintDetails(id) {
+            try {
+                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                const response = await fetch(`admin?action=getOne&id=${id}`);
+                const complaint = await response.json();
+
+                let statusColor = 'text-yellow-600';
+                if (complaint.status.toLowerCase() === 'resolved') {
+                    statusColor = 'text-green-600';
+                } else if (complaint.status.toLowerCase() === 'in progress') {
+                    statusColor = 'text-blue-600';
+                }
+
+                complaintDetails.innerHTML = `
+                    <p><strong>ID:</strong> ${complaint.id}</p>
+                    <p><strong>Name:</strong> ${complaint.name}</p>
+                    <p><strong>Phone:</strong> ${complaint.phone}</p>
+                    <p><strong>Category:</strong> ${complaint.category}</p>
+                    <p><strong>Location:</strong> ${complaint.location}</p>
+                    <p><strong>Landmark:</strong> ${complaint.landmark || 'N/A'}</p>
+                    <p><strong>Description:</strong> ${complaint.description}</p>
+                    <p><strong>Submitted:</strong> ${new Date(complaint.submissionDate).toLocaleString()}</p>
+                    ${complaint.imagePath ? `<p><strong>Image:</strong> <a href="${complaint.imagePath}" target="_blank" class="text-indigo-600 hover:underline">View Uploaded Image</a></p>` : ''}
+                    <div class="mt-4">
+                        <label for="statusUpdate" class="block text-sm font-medium text-gray-700"><strong>Update Status:</strong></label>
+                        <div class="flex gap-4 mt-1">
+                            <select id="statusUpdate" class="block w-full max-w-xs px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="Submitted" ${complaint.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
+                                <option value="In Progress" ${complaint.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                <option value="Resolved" ${complaint.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                            </select>
+                            <button onclick="updateStatus('${complaint.id}')" class="bg-green-600 text-white font-bold py-2 px-4 rounded-md hover:bg-green-700">Update</button>
+                        </div>
                     </div>
                 `;
-                modal.style.display = 'block';
-
-                document.getElementById('update-status-btn').addEventListener('click', () => updateStatus(c.id));
+            } catch (error) {
+                console.error('Fetch Details Error:', error);
+                complaintDetails.innerHTML = '<p class="text-red-500">Could not load details.</p>';
             }
+        }
 
-            function updateStatus(id) {
-                const newStatus = document.getElementById('status-selector').value;
-                const formData = new URLSearchParams();
-                formData.append('action', 'updateStatus');
-                formData.append('complaintId', id);
-                formData.append('status', newStatus);
-
-                fetch('admin', {
+        // Update a complaint's status
+        async function updateStatus(id) {
+            const status = document.getElementById('statusUpdate').value;
+             try {
+                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                const response = await fetch('admin', {
                     method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if(data.success) {
-                        alert('Status updated successfully!');
-                        modal.style.display = 'none';
-                        fetchComplaints(); // Refresh the list
-                    } else {
-                        alert(data.message || 'Failed to update status.');
-                    }
-                })
-                .catch(error => console.error('Update Status Error:', error));
-            }
-
-            // Close modal events
-            modalClose.onclick = () => modal.style.display = 'none';
-            window.onclick = (event) => {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=updateStatus&id=${id}&status=${encodeURIComponent(status)}`
+                });
+                const result = await response.json();
+                if(result.success) {
+                    fetchComplaints();
+                    fetchComplaintDetails(id);
+                } else {
+                    alert('Failed to update status.');
                 }
-            };
-
-        });
+            } catch (error) {
+                console.error('Update Status Error:', error);
+                alert('Server error while updating status.');
+            }
+        }
     </script>
-
 </body>
 </html>
+
