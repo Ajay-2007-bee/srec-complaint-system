@@ -3,13 +3,12 @@ import mysql.connector
 
 # This script attempts to connect to the MySQL database using the
 # same environment variables as the main Java web application.
-# It will print a clear SUCCESS or FAILURE message to the Render logs.
+# It now includes the required SSL certificate for Aiven.
 
-print("--- Starting Database Connection Test ---")
+print("--- Starting Database Connection Test (with SSL) ---")
 
 try:
     # --- 1. Read Credentials from Environment ---
-    # It's crucial that these match the keys used in your web service.
     db_host = os.getenv("DB_HOST")
     db_port = os.getenv("DB_PORT")
     db_name = os.getenv("DB_NAME")
@@ -21,23 +20,25 @@ try:
     print(f"  Port: {db_port}")
     print(f"  Database: {db_name}")
     print(f"  User: {db_user}")
-    # We don't print the password for security reasons.
 
     if not all([db_host, db_port, db_name, db_user, db_pass]):
         raise ValueError("One or more environment variables are missing!")
 
-    # --- 2. Attempt the Connection ---
-    print("\nConnecting to MySQL database...")
+    # --- 2. Attempt the Connection with SSL Certificate ---
+    print("\nConnecting to MySQL database with SSL certificate...")
     
-    cnx = mysql.connector.connect(
-        host=db_host,
-        port=db_port,
-        user=db_user,
-        password=db_pass,
-        database=db_name,
-        ssl_verify_cert=True,
-        ssl_ca=None # Aiven's certs are usually trusted by the system
-    )
+    # This dictionary holds all the connection arguments
+    config = {
+        'host': db_host,
+        'port': db_port,
+        'user': db_user,
+        'password': db_pass,
+        'database': db_name,
+        'ssl_ca': 'ca.pem', # Use the downloaded certificate file
+        'ssl_verify_cert': True
+    }
+
+    cnx = mysql.connector.connect(**config)
 
     # --- 3. Report Success ---
     print("\n" + "="*40)
@@ -64,3 +65,4 @@ except Exception as e:
     print("!"*40 + "\n")
 
 print("--- Test Finished ---")
+

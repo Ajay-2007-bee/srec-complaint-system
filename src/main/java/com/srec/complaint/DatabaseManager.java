@@ -14,7 +14,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DatabaseManager {
 
-    // --- CONFIGURE YOUR DATABASE CONNECTION HERE ---
     // These values are read securely from the Environment Variables on the Render server.
     private static final String DB_HOST = System.getenv("DB_HOST");
     private static final String DB_PORT = System.getenv("DB_PORT");
@@ -25,22 +24,35 @@ public class DatabaseManager {
     // Construct the database URL from the environment variables, including SSL settings for Aiven.
     private static final String DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?verifyServerCertificate=true&useSSL=true&requireSSL=true";
 
-
     // Load the JDBC driver
     static {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
+            System.err.println("CRITICAL ERROR: MySQL JDBC Driver not found!");
+            e.printStackTrace();
             throw new IllegalStateException("Cannot find the driver in the classpath!", e);
         }
     }
 
     private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try {
+            return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        } catch (SQLException e) {
+            // ENHANCED LOGGING: Print every detail of the connection error.
+            System.err.println("!!!!!!!! DATABASE CONNECTION FAILED !!!!!!!");
+            System.err.println("URL: " + DB_URL);
+            System.err.println("User: " + DB_USER);
+            System.err.println("SQLException Message: " + e.getMessage());
+            System.err.println("SQLState: " + e.getSQLState());
+            System.err.println("VendorError: " + e.getErrorCode());
+            e.printStackTrace(); // This prints the full stack trace to the logs.
+            System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            throw e; // Re-throw the exception so the application still fails as expected.
+        }
     }
 
-
-    // --- Admin Methods ---
+    // --- All other methods (validateAdmin, addComplaint, etc.) remain exactly the same ---
     
     public static boolean validateAdmin(String username, String password) throws SQLException {
         String sql = "SELECT username FROM admins WHERE username = ? AND pass = ?";
@@ -51,12 +63,10 @@ public class DatabaseManager {
             pstmt.setString(2, password);
             
             try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next(); // Returns true if a record is found
+                return rs.next();
             }
         }
     }
-
-    // --- Complaint Methods ---
 
     public static String addComplaint(Complaint complaint) throws SQLException {
         String newId = generateUniqueComplaintId();
@@ -129,10 +139,7 @@ public class DatabaseManager {
         }
     }
 
-    // --- Helper Methods ---
-
     private static String generateUniqueComplaintId() {
-        // Generates a random 8-digit number ID
         int number = ThreadLocalRandom.current().nextInt(10000000, 100000000);
         return String.valueOf(number);
     }
