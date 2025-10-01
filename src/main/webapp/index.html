@@ -128,7 +128,7 @@
             showMessage('Submitting complaint...', false);
 
             try {
-                // *** THE FIX IS HERE: Changed from '/complaint' to 'complaint' ***
+                // Use a relative path for reliability
                 const response = await fetch('complaint', {
                     method: 'POST',
                     body: formData
@@ -160,7 +160,7 @@
             statusResult.classList.add('hidden');
             
             try {
-                // *** THE FIX IS HERE: Changed from '/complaint' to 'complaint' ***
+                // Use a relative path for reliability
                 const response = await fetch(`complaint?id=${complaintId}`);
 
                 if (!response.ok) {

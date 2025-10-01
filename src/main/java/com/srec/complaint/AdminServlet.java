@@ -9,12 +9,12 @@ import java.util.Map;
 import com.google.gson.Gson;
 
 import jakarta.servlet.ServletException;
-// import jakarta.servlet.annotation.WebServlet; // Annotation is now removed
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-// @WebServlet("/admin") // This line is removed. Mapping is now in web.xml
+@WebServlet("/admin") // Annotation to map this servlet to the /admin URL
 public class AdminServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private final Gson gson = new Gson();

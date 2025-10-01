@@ -87,7 +87,7 @@
             const password = document.getElementById('password').value;
 
             try {
-                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                // Use a relative path for reliability
                 const response = await fetch('admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -109,7 +109,6 @@
                 }
             } catch (error) {
                 console.error('Login Error:', error);
-                // This is the error you are seeing. It triggers when the fetch itself fails (e.g., 404 Not Found)
                 showLoginError('Server error. Please try again later.');
             }
         });
@@ -140,7 +139,7 @@
         // Fetch all complaints
         async function fetchComplaints() {
             try {
-                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                // Use a relative path for reliability
                 const response = await fetch('admin?action=getAll');
                 const complaints = await response.json();
                 
@@ -179,7 +178,7 @@
         // Fetch details of a single complaint
         async function fetchComplaintDetails(id) {
             try {
-                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                // Use a relative path for reliability
                 const response = await fetch(`admin?action=getOne&id=${id}`);
                 const complaint = await response.json();
 
@@ -222,7 +221,7 @@
         async function updateStatus(id) {
             const status = document.getElementById('statusUpdate').value;
              try {
-                // *** THE FIX IS HERE: Changed from '/admin' to 'admin' ***
+                // Use a relative path for reliability
                 const response = await fetch('admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
