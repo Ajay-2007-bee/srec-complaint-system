@@ -22,8 +22,8 @@ public class DatabaseManager {
     private static final String DB_PASSWORD = System.getenv("DB_PASSWORD");
 
     // Construct the database URL from the environment variables
-    // Added autoReconnect=true&useSSL=false for better stability with cloud databases
-    private static final String DB_URL = "jdbc:mysql://" + DB_HOST + ":3306/" + DB_NAME + "?autoReconnect=true&useSSL=false";
+    // This URL forces SSL which is required by Aiven and other secure cloud DBs
+    private static final String DB_URL = "jdbc:mysql://" + DB_HOST + "/" + DB_NAME + "?verifyServerCertificate=true&useSSL=true&requireSSL=true";
 
     // Load the JDBC driver
     static {
